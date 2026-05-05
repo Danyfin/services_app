@@ -16,17 +16,21 @@ class Listing extends Model
         'price',
         'price_type',
         'category_id',
+        'region_id',
         'address',
         'latitude',
         'longitude',
         'is_active',
         'views_count',
+        'order_requirements',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'is_active' => 'boolean',
         'views_count' => 'integer',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
     ];
 
     public function user()
@@ -39,9 +43,14 @@ class Listing extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
     public function images()
     {
-        return $this->hasMany(Listing_images::class);
+        return $this->hasMany(ListingImage::class);
     }
 
     public function orders()
@@ -52,5 +61,10 @@ class Listing extends Model
     public function favorites()
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
+    }
+
+    public function incrementViews()
+    {
+        $this->increment('views_count');
     }
 }

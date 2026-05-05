@@ -7,18 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-        use HasFactory;
+    use HasFactory;
 
     protected $fillable = [
+        'order_id',
+        'user_id',     
+        'executor_id', 
         'rating',
         'comment',
-        'user_id',
-        'executor_id',
-        'order_id',
     ];
 
-    // Связи
-    public function user()
+    protected $casts = [
+        'rating' => 'integer',
+    ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
+    public function reviewer()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -26,10 +34,5 @@ class Review extends Model
     public function executor()
     {
         return $this->belongsTo(User::class, 'executor_id');
-    }
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
     }
 }

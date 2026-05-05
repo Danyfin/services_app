@@ -2,65 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Review;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function create(Order $order)
     {
-        //
+        if ($order->customer_id !== Auth::id()) {
+            abort(403, 'Только заказчик может оставить отзыв');
+        }
+        
+        if ($order->status !== 'completed') {
+            abort(403, 'Отзыв можно оставить только после завершения заказа');
+        }
+        
+        if ($order->review) {
+            abort(403, 'Отзыв уже оставлен');
+        }
+        
+        return view('reviews.create', compact('order'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    
+    public function store(Request $request, Order $order)
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Review $review)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Review $review)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Review $review)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Review $review)
-    {
-        //
+        if ($order->customer_id !== Auth::id()) {
+            abort(403, 'Только заказчик может оставить отзыв');
+        }
+        
+        if ($order->status !== 'completed') {
+            abort(403, 'Отзыв можно оставить только после завершения заказа');
+        }
+        
+        if ($order->review) {
+            abort(403, 'Отзыв уже оставлен');
+        }
+        
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:2000',
+        ]);
+        
+        $review = Review::create([
+            'order_id' => $order->id,
+            'reviewer_id' => Auth::id(),
+            'executor_id' => $order->executor_id,
+            'rating' => $request->rating,
+            'comment' => $request->comment,
+        ]);
+        
+        $order->executor->updateRating();
+        
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Спасибо за отзыв!');
     }
 }

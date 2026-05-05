@@ -2,25 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
         'login',
+        'name',
         'email',
         'password',
         'phone',
@@ -29,34 +22,27 @@ class User extends Authenticatable
         'rating_avg',
         'about',
         'address',
+        'region_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'rating_avg' => 'decimal:2',
+    ];
 
-        public function listings()
+    public function listings()
     {
         return $this->hasMany(Listing::class);
+    }
+
+    public function isOnline()
+    {
+        return $this->updated_at && $this->updated_at->diffInMinutes(now()) < 5;
     }
 
     public function ordersAsCustomer()
@@ -68,7 +54,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Order::class, 'executor_id');
     }
-
+    
     public function reviewsGiven()
     {
         return $this->hasMany(Review::class, 'user_id');
@@ -82,5 +68,36 @@ class User extends Authenticatable
     public function favorites()
     {
         return $this->belongsToMany(Listing::class, 'favorites')->withTimestamps();
+    }
+
+    public function hasFavorited($listingId)
+    {
+        return $this->favorites()->where('listing_id', $listingId)->exists();
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function updateRating()
+    {
+        $avgRating = $this->reviewsReceived()->avg('rating') ?? 0;
+        $this->update(['rating_avg' => round($avgRating, 2)]);
     }
 }

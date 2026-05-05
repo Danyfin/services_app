@@ -9,230 +9,89 @@ class CategorySeeder extends Seeder
 {
     public function run(): void
     {
+        // Корневые категории
         $categories = [
-            // Основные категории
-            [
-                'name' => 'Ремонт и строительство',
-                'slug' => 'remont-i-stroitelstvo',
-                'description' => 'Ремонт квартир, домов, отделочные работы',
-                'parent_id' => null,
-                'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Уборка и клининг',
-                'slug' => 'uborka-i-klining',
-                'description' => 'Уборка квартир, офисов, химчистка',
-                'parent_id' => null,
-                'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Обучение и консультации',
-                'slug' => 'obuchenie-i-konsultatsii',
-                'description' => 'Репетиторы, курсы, тренинги',
-                'parent_id' => null,
-                'sort_order' => 3,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Красота и здоровье',
-                'slug' => 'krasota-i-zdorove',
-                'description' => 'Парикмахеры, маникюр, массаж, спорт',
-                'parent_id' => null,
-                'sort_order' => 4,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Доставка и грузоперевозки',
-                'slug' => 'dostavka-i-gruzoperevozki',
-                'description' => 'Курьеры, переезды, грузчики',
-                'parent_id' => null,
-                'sort_order' => 5,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Фото и видео',
-                'slug' => 'foto-i-video',
-                'description' => 'Фотографы, видеографы, обработка',
-                'parent_id' => null,
-                'sort_order' => 6,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'IT и разработка',
-                'slug' => 'it-i-razrabotka',
-                'description' => 'Сайты, приложения, программирование',
-                'parent_id' => null,
-                'sort_order' => 7,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Дизайн и творчество',
-                'slug' => 'dizayn-i-tvorchestvo',
-                'description' => 'Дизайн интерьеров, графика, иллюстрации',
-                'parent_id' => null,
-                'sort_order' => 8,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Автоуслуги',
-                'slug' => 'avtouslugi',
-                'description' => 'Ремонт авто, шиномонтаж, эвакуатор',
-                'parent_id' => null,
-                'sort_order' => 9,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Юридические услуги',
-                'slug' => 'yuridicheskie-uslugi',
-                'description' => 'Консультации юристов, адвокатов',
-                'parent_id' => null,
-                'sort_order' => 10,
-                'is_active' => true,
-            ],
-
-            // Подкатегории для "Ремонт и строительство"
-            [
-                'name' => 'Ремонт квартир',
-                'slug' => 'remont-kvartir',
-                'description' => 'Косметический и капитальный ремонт',
-                'parent_id' => 1,
-                'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Электрика',
-                'slug' => 'elektrika',
-                'description' => 'Монтаж проводки, замена розеток',
-                'parent_id' => 1,
-                'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Сантехника',
-                'slug' => 'santehnika',
-                'description' => 'Установка, замена, ремонт',
-                'parent_id' => 1,
-                'sort_order' => 3,
-                'is_active' => true,
-            ],
-
-            // Подкатегории для "Уборка и клининг"
-            [
-                'name' => 'Уборка квартир',
-                'slug' => 'uborka-kvartir',
-                'description' => 'Регулярная и генеральная уборка',
-                'parent_id' => 2,
-                'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Уборка офисов',
-                'slug' => 'uborka-ofisov',
-                'description' => 'Уборка коммерческих помещений',
-                'parent_id' => 2,
-                'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Химчистка',
-                'slug' => 'himchistka',
-                'description' => 'Мягкой мебели, ковров',
-                'parent_id' => 2,
-                'sort_order' => 3,
-                'is_active' => true,
-            ],
-
-            // Подкатегории для "Обучение и консультации"
-            [
-                'name' => 'Репетиторы',
-                'slug' => 'repetitory',
-                'description' => 'Школьные предметы, языки',
-                'parent_id' => 3,
-                'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Музыка и искусство',
-                'slug' => 'muzyka-i-iskusstvo',
-                'description' => 'Обучение музыке, рисованию',
-                'parent_id' => 3,
-                'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Бизнес-консультации',
-                'slug' => 'biznes-konsultatsii',
-                'description' => 'Маркетинг, управление',
-                'parent_id' => 3,
-                'sort_order' => 3,
-                'is_active' => true,
-            ],
-
-            // Подкатегории для "Красота и здоровье"
-            [
-                'name' => 'Парикмахеры',
-                'slug' => 'parikmahery',
-                'description' => 'Стрижки, укладки, окрашивание',
-                'parent_id' => 4,
-                'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Маникюр и педикюр',
-                'slug' => 'manikyur-i-pedikyur',
-                'description' => 'Ногтевой сервис',
-                'parent_id' => 4,
-                'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Массаж',
-                'slug' => 'massazh',
-                'description' => 'Лечебный, спортивный, релакс',
-                'parent_id' => 4,
-                'sort_order' => 3,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Фитнес и йога',
-                'slug' => 'fitnes-i-yoga',
-                'description' => 'Тренировки, растяжка',
-                'parent_id' => 4,
-                'sort_order' => 4,
-                'is_active' => true,
-            ],
-
-            // Подкатегории для "IT и разработка"
-            [
-                'name' => 'Разработка сайтов',
-                'slug' => 'razrabotka-saytov',
-                'description' => 'Создание и поддержка сайтов',
-                'parent_id' => 7,
-                'sort_order' => 1,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Мобильные приложения',
-                'slug' => 'mobilnye-prilozheniya',
-                'description' => 'iOS, Android разработка',
-                'parent_id' => 7,
-                'sort_order' => 2,
-                'is_active' => true,
-            ],
-            [
-                'name' => 'SEO продвижение',
-                'slug' => 'seo-prodvizhenie',
-                'description' => 'Оптимизация сайтов',
-                'parent_id' => 7,
-                'sort_order' => 3,
-                'is_active' => true,
-            ],
+            // Ремонт и строительство
+            ['name' => 'Ремонт и строительство', 'slug' => 'remont', 'sort_order' => 1],
+            ['name' => 'Сантехника', 'slug' => 'santehnika', 'sort_order' => 2],
+            ['name' => 'Электрика', 'slug' => 'elektrika', 'sort_order' => 3],
+            ['name' => 'Клининг и уборка', 'slug' => 'cleaning', 'sort_order' => 4],
+            
+            // Красота и здоровье
+            ['name' => 'Красота и здоровье', 'slug' => 'beauty', 'sort_order' => 5],
+            ['name' => 'Парикмахерские услуги', 'slug' => 'hairdresser', 'sort_order' => 6],
+            ['name' => 'Маникюр и педикюр', 'slug' => 'manicure', 'sort_order' => 7],
+            
+            // Обучение и консультации
+            ['name' => 'Обучение и консультации', 'slug' => 'education', 'sort_order' => 8],
+            ['name' => 'Репетиторы', 'slug' => 'repetitors', 'sort_order' => 9],
+            ['name' => 'Курсы и тренинги', 'slug' => 'courses', 'sort_order' => 10],
+            
+            // Дизайн и IT
+            ['name' => 'Дизайн и IT', 'slug' => 'design', 'sort_order' => 11],
+            ['name' => 'Веб-разработка', 'slug' => 'webdev', 'sort_order' => 12],
+            ['name' => 'Графический дизайн', 'slug' => 'graphic', 'sort_order' => 13],
+            
+            // Бытовые услуги
+            ['name' => 'Бытовые услуги', 'slug' => 'household', 'sort_order' => 14],
+            ['name' => 'Ремонт техники', 'slug' => 'repair', 'sort_order' => 15],
+            ['name' => 'Доставка и грузчики', 'slug' => 'delivery', 'sort_order' => 16],
+            
+            // Творчество и рукоделие
+            ['name' => 'Творчество и рукоделие', 'slug' => 'creative', 'sort_order' => 17],
+            ['name' => 'Дизайн интерьера', 'slug' => 'interior', 'sort_order' => 18],
+            ['name' => 'Фотография и видео', 'slug' => 'photo', 'sort_order' => 19],
+            ['name' => 'Digital Art', 'slug' => 'digitalart', 'sort_order' => 20],
         ];
 
-        foreach ($categories as $category) {
-            Category::create($category);
+        foreach ($categories as $cat) {
+            Category::create($cat);
+        }
+
+        // Подкатегории
+        $subcategories = [
+            // Ремонт и строительство
+            ['name' => 'Отделочные работы', 'slug' => 'otdelka', 'parent_slug' => 'remont', 'sort_order' => 1],
+            ['name' => 'Ремонт квартир', 'slug' => 'remont-kvartir', 'parent_slug' => 'remont', 'sort_order' => 2],
+            ['name' => 'Установка окон и дверей', 'slug' => 'windows', 'parent_slug' => 'remont', 'sort_order' => 3],
+            
+            // Сантехника
+            ['name' => 'Установка сантехники', 'slug' => 'ustanovka', 'parent_slug' => 'santehnika', 'sort_order' => 1],
+            ['name' => 'Ремонт сантехники', 'slug' => 'remont-santehniki', 'parent_slug' => 'santehnika', 'sort_order' => 2],
+            ['name' => 'Засоры и прочистка', 'slug' => 'zasory', 'parent_slug' => 'santehnika', 'sort_order' => 3],
+            
+            // Электрика
+            ['name' => 'Электромонтаж', 'slug' => 'elektromontazh', 'parent_slug' => 'elektrika', 'sort_order' => 1],
+            ['name' => 'Замена проводки', 'slug' => 'wiring', 'parent_slug' => 'elektrika', 'sort_order' => 2],
+            ['name' => 'Установка освещения', 'slug' => 'lighting', 'parent_slug' => 'elektrika', 'sort_order' => 3],
+            
+            // Графический дизайн
+            ['name' => 'Логотипы и айдентика', 'slug' => 'logos', 'parent_slug' => 'graphic', 'sort_order' => 1],
+            ['name' => 'Иллюстрации на заказ', 'slug' => 'illustrations', 'parent_slug' => 'graphic', 'sort_order' => 2],
+            ['name' => 'Digital Art', 'slug' => 'digitalart-sub', 'parent_slug' => 'graphic', 'sort_order' => 3],
+            
+            // Веб-разработка
+            ['name' => 'Сайты под ключ', 'slug' => 'sites', 'parent_slug' => 'webdev', 'sort_order' => 1],
+            ['name' => 'Интернет-магазины', 'slug' => 'eshop', 'parent_slug' => 'webdev', 'sort_order' => 2],
+            ['name' => 'Верстка сайтов', 'slug' => 'layout', 'parent_slug' => 'webdev', 'sort_order' => 3],
+            
+            // Репетиторы
+            ['name' => 'Математика', 'slug' => 'math', 'parent_slug' => 'repetitors', 'sort_order' => 1],
+            ['name' => 'Русский язык', 'slug' => 'russian', 'parent_slug' => 'repetitors', 'sort_order' => 2],
+            ['name' => 'Английский язык', 'slug' => 'english', 'parent_slug' => 'repetitors', 'sort_order' => 3],
+            ['name' => 'Программирование', 'slug' => 'programming', 'parent_slug' => 'repetitors', 'sort_order' => 4],
+        ];
+
+        foreach ($subcategories as $sub) {
+            $parent = Category::where('slug', $sub['parent_slug'])->first();
+            if ($parent) {
+                Category::create([
+                    'name' => $sub['name'],
+                    'slug' => $sub['slug'],
+                    'parent_id' => $parent->id,
+                    'sort_order' => $sub['sort_order'],
+                ]);
+            }
         }
     }
 }

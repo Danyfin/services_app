@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Listing_images extends Model
+class ListingImage extends Model
 {
     use HasFactory;
 
@@ -15,7 +15,7 @@ class Listing_images extends Model
         'sort_order',
     ];
 
-    // Связи
+    // Связь с объявлением
     public function listing()
     {
         return $this->belongsTo(Listing::class);

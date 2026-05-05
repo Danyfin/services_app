@@ -14,7 +14,6 @@ class Favorite extends Model
         'listing_id',
     ];
 
-    // Связи
     public function user()
     {
         return $this->belongsTo(User::class);

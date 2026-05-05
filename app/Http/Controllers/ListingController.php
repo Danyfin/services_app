@@ -2,126 +2,246 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Listing;
-use App\Http\Controllers\Controller;
+use App\Models\Category;
+use App\Models\Region;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ListingController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index(Request $request)
+    public function welcome()
     {
-            
+        $categories = Category::whereNull('parent_id')
+            ->with('children')
+            ->orderBy('sort_order')
+            ->get();
+        
+        $regions = Region::where('is_active', true)->get();
+        $currentRegion = Region::find(session('current_region_id'));
+        
+        return view('welcome', compact('categories', 'regions', 'currentRegion'));
+    }
+    
+    public function search(Request $request)
+    {
+        $query = Listing::with(['user', 'category', 'region', 'images'])
+            ->where('is_active', true);
+        
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%')
+                ->orWhere('description', 'like', '%' . $searchTerm . '%');
+            });
+        }
+        
+        if ($request->filled('category_id')) {
+            $category = Category::find($request->category_id);
+            if ($category) {
+                $categoryIds = $this->getAllCategoryIds($category);
+                $query->whereIn('category_id', $categoryIds);
+            }
+        }
+        
+        if (session('current_region_id')) {
+            $query->where('region_id', session('current_region_id'));
+        }
+        
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', $request->price_min);
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
+        }
+        
+        switch ($request->get('sort', 'latest')) {
+            case 'price_asc':
+                $query->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $query->orderBy('price', 'desc');
+                break;
+            default:
+                $query->latest();
+        }
+        
+        $listings = $query->paginate(15)->appends($request->query());
+        
+        $categories = Category::whereNull('parent_id')
+            ->with('children')
+            ->orderBy('sort_order')
+            ->get();
+        
+        $regions = Region::where('is_active', true)->get();
+        $currentRegion = Region::find(session('current_region_id'));
+        $searchQuery = $request->get('search', '');
+        $selectedCategoryId = $request->get('category_id');
+        
+        return view('listings.search-results', compact(
+            'listings', 
+            'categories', 
+            'regions', 
+            'currentRegion', 
+            'searchQuery',
+            'selectedCategoryId'
+        ));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    private function getAllCategoryIds($category)
     {
-        $categories = Category::where('is_active', true)->get();
-        return view('listings.create', compact('categories'));
+        $ids = [$category->id];
+        foreach ($category->children as $child) {
+            $ids[] = $child->id;
+            foreach ($child->children as $grandchild) {
+                $ids[] = $grandchild->id;
+            }
+        }
+        return $ids;
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-            $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'price_type' => ['required', 'in:fixed,hour,negotiable'],
-            'address' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        Listing::create([
-            'user_id' => Auth::id(),
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
-            'price_type' => $request->price_type,
-            'address' => $request->address,
-            'is_active' => true,
-        ]);
-
-        return redirect()->route('dashboard')->with('success', 'Объявление создано!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
+    
     public function show(Listing $listing)
     {
-        $listing->increment('views_count');
-    
-        return view('listings.show', compact('listing'));
+        $listing->incrementViews();
+        
+        $messages = Message::where('listing_id', $listing->id)
+            ->where(function($q) {
+                $q->where('sender_id', Auth::id())
+                  ->orWhere('receiver_id', Auth::id());
+            })
+            ->orderBy('created_at')
+            ->get();
+        
+        $regions = Region::where('is_active', true)->get();
+        $currentRegion = Region::find(session('current_region_id'));
+        
+        return view('listings.show', compact('listing', 'messages', 'regions', 'currentRegion'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
+    
+    public function create()
+    {
+        $categories = Category::all();
+        $regions = Region::where('is_active', true)->get();
+        $currentRegion = Region::find(session('current_region_id'));
+        
+        return view('listings.create', compact('categories', 'regions', 'currentRegion'));
+    }
+    
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'nullable|numeric|min:0',
+            'price_type' => 'required|in:fixed,hour,negotiable',
+            'category_id' => 'required|exists:categories,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'address' => 'nullable|string|max:255',
+            'order_requirements' => 'nullable|string',
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:5120',
+        ]);
+        
+        $validated['user_id'] = Auth::id();
+        $validated['is_active'] = true;
+        $validated['views_count'] = 0;
+        
+        if (!$validated['region_id'] && session('current_region_id')) {
+            $validated['region_id'] = session('current_region_id');
+        }
+        
+        $listing = Listing::create($validated);
+        
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('listings', 'public');
+                $listing->images()->create([
+                    'image_path' => $path,
+                    'sort_order' => $index,
+                ]);
+            }
+        }
+        
+        return redirect()->route('listings.show', $listing)
+            ->with('success', 'Объявление создано!');
+    }
+    
     public function edit(Listing $listing)
     {
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'У вас нет прав на редактирование этого объявления');
+        if ($listing->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            abort(403);
         }
         
-        $categories = Category::where('is_active', true)->get();
+        $categories = Category::orderBy('name')->get();
+        $regions = Region::where('is_active', true)->get();
+        $currentRegion = Region::find(session('current_region_id'));
         
-        return view('listings.edit', compact('listing', 'categories'));
+        return view('listings.edit', compact('listing', 'categories', 'regions', 'currentRegion'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
+    
     public function update(Request $request, Listing $listing)
     {
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'У вас нет прав на редактирование этого объявления');
+        if ($listing->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            abort(403);
         }
         
-        $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'description' => ['required', 'string'],
-            'category_id' => ['required', 'exists:categories,id'],
-            'price' => ['nullable', 'numeric', 'min:0'],
-            'price_type' => ['required', 'in:fixed,hour,negotiable'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'is_active' => ['sometimes', 'boolean'],
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'nullable|numeric|min:0',
+            'price_type' => 'required|in:fixed,hour,negotiable',
+            'category_id' => 'required|exists:categories,id',
+            'region_id' => 'nullable|exists:regions,id',
+            'address' => 'nullable|string',
+            'order_requirements' => 'nullable|string',
+            'is_active' => 'sometimes|boolean',
+            'images.*' => 'image|mimes:jpeg,png,jpg|max:5120',
         ]);
         
-        $listing->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'category_id' => $request->category_id,
-            'price' => $request->price,
-            'price_type' => $request->price_type,
-            'address' => $request->address,
-            'is_active' => $request->has('is_active'),
-        ]);
+        $listing->update($validated);
         
-        return redirect()->route('listings.show', $listing)->with('success', 'Объявление обновлено!');
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('listings', 'public');
+                $listing->images()->create([
+                    'image_path' => $path,
+                    'sort_order' => $listing->images()->count() + $index,
+                ]);
+            }
+        }
+        
+        return redirect()->route('listings.show', $listing)
+            ->with('success', 'Объявление обновлено!');
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
+    
     public function destroy(Listing $listing)
     {
-        if ($listing->user_id !== Auth::id()) {
-            abort(403, 'У вас нет прав на удаление этого объявления');
+        if ($listing->user_id !== Auth::id() && Auth::user()->role !== 'admin') {
+            abort(403);
+        }
+        
+        foreach ($listing->images as $image) {
+            Storage::disk('public')->delete($image->image_path);
+            $image->delete();
         }
         
         $listing->delete();
         
-        return redirect()->route('dashboard')->with('success', 'Объявление удалено!');
+        return redirect()->route('dashboard')
+            ->with('success', 'Объявление удалено');
+    }
+    
+    public function myListings()
+    {
+        $listings = Listing::with(['category', 'region'])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->paginate(15);
+        
+        $regions = Region::where('is_active', true)->get();
+        $currentRegion = Region::find(session('current_region_id'));
+        
+        return view('listings.my-listings', compact('listings', 'regions', 'currentRegion'));
     }
 }
