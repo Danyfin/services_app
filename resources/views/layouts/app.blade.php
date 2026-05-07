@@ -92,7 +92,28 @@
 
         <footer class="bg-white border-t border-gray-200 mt-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-500 text-sm">
-                © {{ date('Y') }} ХЭЛПА. Поиск мастеров в вашем городе.
+                <div class="flex justify-between items-center h-16 gap-4">
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('welcome') }}" class="text-2xl font-bold text-indigo-600">
+                            ХЭЛПА
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        @auth
+                            <a href="{{ route('messages.index') }}" class="text-gray-700 hover:text-indigo-600">
+                                Сообщения
+                            </a>
+                            <a href="{{ route('orders.index') }}" class="text-gray-700 hover:text-indigo-600">
+                                Мои заказы
+                            </a>
+                            <a href="{{ route('profile.show') }}" class="text-gray-700 hover:text-indigo-600">
+                                Профиль
+                            </a>
+                        @else
+                        @endauth
+                    </div>
+                </div>
             </div>
         </footer>
     </div>

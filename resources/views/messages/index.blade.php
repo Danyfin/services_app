@@ -15,15 +15,18 @@
                 <div class="flex-1 overflow-y-auto">
                     @forelse($dialogs as $dialog)
                         <a href="{{ route('messages.dialog', $dialog->id) }}" 
-                           class="block p-4 border-b border-gray-100 hover:bg-gray-50 transition {{ isset($otherUser) && $otherUser->id == $dialog->id ? 'bg-indigo-50' : '' }}">
+                        class="block p-4 border-b border-gray-100 hover:bg-gray-50 transition {{ (isset($otherUser) && $otherUser && $otherUser->id == $dialog->id) ? 'bg-indigo-50' : '' }}">
                             <div class="flex items-start gap-3">
-                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold flex-shrink-0 ">
-                                    @if($otherUser->avatar)
-                                        <img src="{{ asset('storage/' . $otherUser->avatar) }}" class="w-full h-full object-cover rounded-full">
+                                <div class="w-10 h-10 rounded-full overflow-hidden bg-indigo-100 flex-shrink-0 flex items-center justify-center">
+                                    @if($dialog->avatar)
+                                        <img src="{{ asset('storage/' . $dialog->avatar) }}" class="w-full h-full object-cover">
                                     @else
-                                        {{ substr($otherUser->name ?? 'U', 0, 1) }}
+                                        <span class="text-indigo-600 font-bold">
+                                            {{ substr($dialog->name ?? 'U', 0, 1) }}
+                                        </span>
                                     @endif
                                 </div>
+                                
                                 <div class="flex-1 min-w-0">
                                     <div class="flex justify-between items-start">
                                         <h4 class="font-medium text-gray-900 truncate">{{ $dialog->name }}</h4>
